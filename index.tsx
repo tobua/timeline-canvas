@@ -1,7 +1,7 @@
 import { scale } from 'optica'
 import { type CSSProperties, useEffect, useRef } from 'react'
 import { createRoot } from 'react-dom/client'
-import { intializeCanvas } from './canvas'
+import { clearCanvas, intializeCanvas, renderLinesUntilIndex, renderStaticCanvasParts } from './canvas'
 
 document.body.style.display = 'flex'
 document.body.style.justifyContent = 'center'
@@ -62,6 +62,17 @@ const App = () => {
     const canvas = canvasRef.current
     if (!canvas) return
     intializeCanvas(canvas)
+
+    for (let index = 10; index < 20; index++) {
+      setTimeout(
+        () => {
+          clearCanvas()
+          renderStaticCanvasParts()
+          renderLinesUntilIndex(index)
+        },
+        (index - 10) * 1000,
+      )
+    }
   }, [])
 
   return (
