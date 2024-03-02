@@ -1,3 +1,7 @@
+import preact from './asset/preact.png'
+import react from './asset/react.png'
+import solid from './asset/solid.png'
+
 const getRandomInteger = (minimum: number, maximum: number) => Math.floor(Math.random() * (maximum - minimum + 1)) + minimum
 
 export function jsxFrameworks() {
@@ -15,4 +19,19 @@ export function jsxFrameworks() {
   }
 
   return data
+}
+
+export const jsxFrameworkLabels = {
+  react: {
+    label: 'React',
+    image: react,
+  },
+  preact: {
+    label: 'Preact',
+    image: preact,
+  },
+  solid: {
+    label: 'Solid',
+    image: solid,
+  },
 }
