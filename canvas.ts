@@ -1,20 +1,13 @@
-import { jsxFrameworkLabels, jsxFrameworks } from './data'
+// import * as bezierImport from 'bezier-js'
+import type { Labels, Values } from './data'
+import { Color, Space } from './style'
+
+// const Bezier = bezierImport.Bezier
 
 let context: CanvasRenderingContext2D
-const Space = {
-  small: 10,
-  medium: 20,
-  large: 40,
-}
-const data = jsxFrameworks()
-const labels = jsxFrameworkLabels
-type Data = typeof data
-const keys = [
-  { label: 'react', color: 'red' },
-  { label: 'preact', color: 'green' },
-  { label: 'solid', color: 'blue' },
-] as const
-type Keys = typeof keys
+let values: Values<number> = []
+let labels: Labels<number> = {}
+
 const sizes = {
   padding: 50,
   paddingRight: 100,
@@ -28,13 +21,13 @@ const sizes = {
   yEnd: 50,
 }
 
-function findMaximumRange(data: Data, keys: Keys) {
+function findMaximumRange(partialValues: Values<number>) {
   let max = 0
 
-  for (const value of data) {
-    for (const { label } of keys) {
-      if (value[label] > max) {
-        max = value[label]
+  for (const value of partialValues) {
+    for (const labelKey in labels) {
+      if (value[labelKey] > max) {
+        max = value[labelKey]
       }
     }
   }
@@ -42,7 +35,7 @@ function findMaximumRange(data: Data, keys: Keys) {
   return max
 }
 
-function drawPoint(x: number, y: number, color = 'black') {
+function drawPoint(x: number, y: number, color = Color.black) {
   context.beginPath()
   context.arc(x, y, 5, 0, Math.PI * 2)
   context.fillStyle = color
@@ -57,21 +50,46 @@ function drawImage(url: string, x: number, y: number, width: number, height: num
   }
 }
 
+function drawUnit(value: string | number, unit?: string) {
+  context.beginPath()
+
+  const padding = Space.small
+  context.font = '36px Arial'
+  const textMeasure = context.measureText(String(value))
+  const boxWidth = textMeasure.width + 2 * padding
+  const boxHeight = textMeasure.fontBoundingBoxAscent + 2 * padding + 2 * padding
+
+  context.fillStyle = Color.gray[300]
+  context.roundRect(sizes.xStart + 2 * padding, sizes.yEnd - boxHeight / 2 + padding / 2, boxWidth, boxHeight, Space.small)
+  context.fill()
+
+  context.fillStyle = Color.black
+  context.textAlign = 'left'
+  context.fillText(String(value), sizes.xStart + 3 * padding, sizes.yEnd + padding - 2)
+
+  if (unit) {
+    context.font = '18px Arial'
+    context.textAlign = 'center'
+    context.fillText(unit, sizes.xStart + 7 * padding, sizes.yEnd + 3 * padding)
+  }
+}
+
 function drawLabel(text: string, image: string, x: number, y: number) {
   context.beginPath()
 
   const padding = Space.small
   const imageSize = Space.medium
+  context.font = '24px Arial'
   const textWidth = context.measureText(text).width
   const boxWidth = textWidth + 2 * padding + imageSize + padding
   const boxHeight = imageSize + 2 * padding
 
-  context.fillStyle = 'lightgray'
+  context.fillStyle = Color.gray[300]
   context.roundRect(x + padding, y - boxHeight / 2, boxWidth, boxHeight, Space.small)
   context.fill()
 
-  context.fillStyle = 'black'
-  context.font = '24px Arial'
+  context.fillStyle = Color.black
+
   context.textAlign = 'left'
   context.fillText(text, x + 3 * padding + imageSize, y + padding - 2)
 
@@ -79,33 +97,50 @@ function drawLabel(text: string, image: string, x: number, y: number) {
 }
 
 export function renderLinesUntilIndex(maxIndex: number) {
-  const dataUntilIndex = data.slice(0, maxIndex)
-  const maximumRange = findMaximumRange(dataUntilIndex, keys)
+  const dataUntilIndex = values.slice(0, maxIndex)
+  const maximumRange = findMaximumRange(dataUntilIndex)
 
-  for (const { label: labelKey, color } of keys) {
-    const label = labels[labelKey]
-    const labelPosition = { x: 0, y: 0 }
+  // TODO unit configurable.
+  drawUnit(values[maxIndex - 1].unit, 'Year')
+
+  for (const labelKey in labels) {
+    const { label, image, color } = labels[labelKey]
+    const previousPoint = { x: 0, y: 0 }
+    const currentPoint = { x: 0, y: 0 }
+    const nextPoint = { x: 0, y: 0 }
     context.beginPath()
-    context.lineWidth = 2
+    context.lineWidth = 4
     context.strokeStyle = color
     dataUntilIndex.forEach((value, index) => {
-      const current = value[labelKey]
+      const currentValue = value[labelKey]
+      const nextValue = values[index + 1][labelKey]
 
-      const positionX = index === 0 ? sizes.xStart : sizes.xStart + (sizes.chartWidth / (maxIndex - 1)) * index
-      const positionY = sizes.yStart - (current / maximumRange) * sizes.chartHeight
+      if (currentPoint.x === 0 && currentPoint.y === 0) {
+        currentPoint.x = index === 0 ? sizes.xStart : sizes.xStart + (sizes.chartWidth / (maxIndex - 1)) * index
+        currentPoint.y = sizes.yStart - (currentValue / maximumRange) * sizes.chartHeight
+      }
+
+      nextPoint.x = index === 0 ? sizes.xStart : sizes.xStart + (sizes.chartWidth / (maxIndex - 1)) * index
+      nextPoint.y = sizes.yStart - (nextValue / maximumRange) * sizes.chartHeight
+
       if (index > 0) {
-        context.lineTo(positionX, positionY)
+        // https://pomax.github.io/bezierjs/#fromPoints
+        // const dpoints = Bezier.quadraticFromPoints(previousPoint, currentPoint, nextPoint, 0.6).points[1]
+        // context.quadraticCurveTo(dpoints.x, dpoints.y, currentPoint.x, currentPoint.y)
+        context.lineTo(currentPoint.x, currentPoint.y)
+        // context.bezierCurveTo(xc, yc, xcp, ycp, positionX, positionY)
       } else {
-        context.moveTo(positionX, positionY)
+        context.moveTo(currentPoint.x, currentPoint.y)
       }
 
-      if (index === maxIndex - 1) {
-        labelPosition.x = positionX
-        labelPosition.y = positionY
-      }
+      previousPoint.x = currentPoint.x
+      previousPoint.y = currentPoint.y
+
+      currentPoint.x = nextPoint.x
+      currentPoint.y = nextPoint.y
     })
     context.stroke()
-    drawLabel(label.label, label.image, labelPosition.x, labelPosition.y)
+    drawLabel(label, image, previousPoint.x, previousPoint.y)
   }
 }
 
@@ -115,7 +150,7 @@ export function clearCanvas() {
 }
 
 function labelAxes() {
-  context.fillStyle = 'black'
+  context.fillStyle = Color.black
   context.font = '24px Arial'
   context.textAlign = 'center'
   context.fillText('Time', sizes.width / 2, sizes.height - 0.4 * sizes.padding)
@@ -129,7 +164,7 @@ function labelAxes() {
 
 function drawAxes() {
   context.beginPath()
-  context.strokeStyle = 'black'
+  context.strokeStyle = Color.black
   context.lineWidth = 2
   context.moveTo(sizes.xStart, sizes.yStart - 1)
   context.lineTo(sizes.xEnd, sizes.yStart)
@@ -143,13 +178,19 @@ function drawAxes() {
 }
 
 export function renderStaticCanvasParts() {
-  context.fillStyle = 'lightblue'
+  context.fillStyle = Color.gray[100]
   context.fillRect(0, 0, sizes.width, sizes.height)
 
   drawAxes()
   labelAxes()
 
-  drawPoint(sizes.xStart, sizes.yStart, 'yellow')
+  // TODO remove, used for debugging.
+  drawPoint(sizes.xStart, sizes.yStart, Color.black)
+}
+
+export function addChartData(data: { values: Values<number>; labels: Labels<number> })  {
+  values = data.values
+  labels = data.labels
 }
 
 export function intializeCanvas(canvas: HTMLCanvasElement) {

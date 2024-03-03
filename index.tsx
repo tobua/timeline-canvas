@@ -1,7 +1,10 @@
 import { scale } from 'optica'
-import { type CSSProperties, useEffect, useRef } from 'react'
+import { type CSSProperties, useEffect, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
-import { clearCanvas, intializeCanvas, renderLinesUntilIndex, renderStaticCanvasParts } from './canvas'
+import { Configuration } from './Configuration'
+import { addChartData, clearCanvas, intializeCanvas, renderLinesUntilIndex, renderStaticCanvasParts } from './canvas'
+import { jsxFrameworkDownloads, largeCapCompanies } from './data'
+import { Color } from './style'
 
 document.body.style.display = 'flex'
 document.body.style.justifyContent = 'center'
@@ -31,9 +34,11 @@ const headingStyles: CSSProperties = {
 
 const contentStyles: CSSProperties = {
   display: 'flex',
+  flexDirection: 'column',
+  gap: scale(10),
   position: 'relative',
   alignItems: 'center',
-  background: 'lightgray',
+  background: Color.gray[300],
   borderRadius: scale(20),
   padding: scale(10),
   aspectRatio: 16 / 9,
@@ -43,7 +48,6 @@ const canvasStyles: CSSProperties = {
   display: 'flex',
   height: '100%',
   width: '100%',
-  background: 'white',
   borderRadius: scale(10),
 }
 
@@ -57,13 +61,21 @@ const footerStyles: CSSProperties = {
 
 const App = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const [data, setData] = useState(jsxFrameworkDownloads())
 
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
     intializeCanvas(canvas)
+  }, [])
 
-    for (let index = 10; index < 20; index++) {
+  useEffect(() => {
+    addChartData(data)
+    clearCanvas()
+    renderStaticCanvasParts()
+    renderLinesUntilIndex(10)
+
+    for (let index = 10; index < 30; index++) {
       setTimeout(
         () => {
           clearCanvas()
@@ -73,19 +85,20 @@ const App = () => {
         (index - 10) * 1000,
       )
     }
-  }, [])
+  }, [data])
 
   return (
     <div style={appStyles}>
       <header style={headerStyles}>
         <h1 style={headingStyles}>Timeline Chart</h1>
-        <select>
-          <option>Frontend Frameworks</option>
-          <option>Companies by Market Capitalization</option>
+        <select onChange={event => setData(event.target.value === 'jsx' ? jsxFrameworkDownloads() : largeCapCompanies())} >
+          <option value="jsx">Frontend Frameworks</option>
+          <option value="market-capitalization">Companies by Market Capitalization</option>
         </select>
       </header>
       <main style={contentStyles}>
         <canvas style={canvasStyles} ref={canvasRef} />
+        <Configuration />
       </main>
       <footer style={footerStyles}>
         <p>Canvas</p>

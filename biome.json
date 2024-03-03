@@ -8,13 +8,11 @@
 		"rules": {
 			"all": true,
 			"nursery": {
-				"all": true,
-				"useImportRestrictions": "off",
-				"useFilenamingConvention": "off"
+				"all": true
 			},
 			"style": {
 				"all": true,
-				"useBlockStatements": "off"
+				"useEnumInitializers": false
 			}
 		},
 		"ignore": ["node_modules"]
