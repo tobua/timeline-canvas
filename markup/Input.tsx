@@ -1,24 +1,6 @@
 import { scale } from 'optica'
-import { type CSSProperties, type JSX, useState } from 'react'
-import { Color } from './style'
-
-const buttonStyles: CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  border: 'none',
-  background: Color.black,
-  color: Color.white,
-  outline: 'none',
-  borderRadius: scale(10),
-  height: scale(40),
-  paddingLeft: scale(20),
-  paddingRight: scale(20),
-  cursor: 'pointer',
-}
-
-function Button({ style, ...props }: JSX.IntrinsicElements['button']) {
-  return <button type="submit" {...props} style={{ ...buttonStyles, ...style }} />
-}
+import type { CSSProperties, JSX } from 'react'
+import { Color } from '../style'
 
 const inputWrapperStyles: CSSProperties = {
   position: 'relative',
@@ -47,6 +29,7 @@ const descriptionLabelStyles: CSSProperties = {
   fontSize: scale(14),
   display: 'flex',
   alignItems: 'center',
+  whiteSpace: 'nowrap',
 }
 
 const unitLabelStyles: CSSProperties = {
@@ -60,7 +43,7 @@ const unitLabelStyles: CSSProperties = {
   pointerEvents: 'none',
 }
 
-function Input({
+export function Input({
   style,
   unit,
   onValue,
@@ -72,24 +55,6 @@ function Input({
       <label style={descriptionLabelStyles}>{placeholder}</label>
       <label style={unitLabelStyles}>{unit}</label>
       <input type="number" onChange={(event) => onValue(Number(event.target.value))} {...props} style={{ ...inputStyles, ...style }} />
-    </div>
-  )
-}
-
-const wrapperStyles: CSSProperties = {
-  display: 'flex',
-  alignItems: 'flex-end',
-  gap: scale(20),
-}
-
-export function Configuration() {
-  const [duration, setDuration] = useState(5)
-  const [fps, setFps] = useState(60)
-  return (
-    <div style={wrapperStyles}>
-      <Input placeholder="Duration" unit="Seconds" value={duration} onValue={setDuration} />
-      <Input placeholder="Frames per second" unit="FPS" value={fps} onValue={setFps} />
-      <Button>Restart</Button>
     </div>
   )
 }

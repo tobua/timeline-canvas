@@ -1,9 +1,10 @@
 import { scale } from 'optica'
 import { type CSSProperties, useEffect, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
-import { Configuration } from './Configuration'
-import { addChartData, clearCanvas, intializeCanvas, renderLinesUntilIndex, renderStaticCanvasParts } from './canvas'
+import { addChartData, intializeCanvas } from './canvas'
 import { jsxFrameworkDownloads, largeCapCompanies } from './data'
+import { Configuration } from './markup/Configuration'
+import { Select } from './markup/Select'
 import { Color } from './style'
 
 document.body.style.display = 'flex'
@@ -62,43 +63,35 @@ const footerStyles: CSSProperties = {
 const App = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [data, setData] = useState(jsxFrameworkDownloads())
+  const [busy, setBusy] = useState(true)
 
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
     intializeCanvas(canvas)
+    setBusy(false)
   }, [])
 
   useEffect(() => {
     addChartData(data)
-    clearCanvas()
-    renderStaticCanvasParts()
-    renderLinesUntilIndex(10)
-
-    for (let index = 10; index < 30; index++) {
-      setTimeout(
-        () => {
-          clearCanvas()
-          renderStaticCanvasParts()
-          renderLinesUntilIndex(index)
-        },
-        (index - 10) * 1000,
-      )
-    }
   }, [data])
 
   return (
     <div style={appStyles}>
       <header style={headerStyles}>
         <h1 style={headingStyles}>Timeline Chart</h1>
-        <select onChange={event => setData(event.target.value === 'jsx' ? jsxFrameworkDownloads() : largeCapCompanies())} >
-          <option value="jsx">Frontend Frameworks</option>
-          <option value="market-capitalization">Companies by Market Capitalization</option>
-        </select>
+        <Select
+          placeholder="Data Source"
+          options={[
+            { label: 'Frontend Frameworks', value: 'jsx' },
+            { label: 'Companies by Market Capitalization', value: 'market-capitalization' },
+          ]}
+          onOption={(option) => setData(option === 'jsx' ? jsxFrameworkDownloads() : largeCapCompanies())}
+        />
       </header>
       <main style={contentStyles}>
         <canvas style={canvasStyles} ref={canvasRef} />
-        <Configuration />
+        <Configuration busy={busy} values={data.values} />
       </main>
       <footer style={footerStyles}>
         <p>Canvas</p>

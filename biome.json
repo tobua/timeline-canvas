@@ -8,11 +8,12 @@
 		"rules": {
 			"all": true,
 			"nursery": {
-				"all": true
+				"all": true,
+				"useImportRestrictions": "off"
 			},
 			"style": {
 				"all": true,
-				"useEnumInitializers": false
+				"useEnumInitializers": "off"
 			}
 		},
 		"ignore": ["node_modules"]
