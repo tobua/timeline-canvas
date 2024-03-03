@@ -1,8 +1,6 @@
-// import * as bezierImport from 'bezier-js'
+import Spline from 'typescript-cubic-spline'
 import type { Labels, Values } from './data'
 import { Color, Space } from './style'
-
-// const Bezier = bezierImport.Bezier
 
 let context: CanvasRenderingContext2D
 let values: Values<number> = []
@@ -101,7 +99,6 @@ function drawLabel(text: string, x: number, y: number, image?: string) {
 }
 
 export function renderLinesUntilIndex(maxIndex: number, currentFrame: number) {
-  console.log({ currentFrame, maxIndex })
   const dataUntilIndex = values.slice(0, maxIndex)
   const maximumRange = findMaximumRange(dataUntilIndex)
 
@@ -109,43 +106,31 @@ export function renderLinesUntilIndex(maxIndex: number, currentFrame: number) {
   drawUnit(values[maxIndex - 1].unit, 'Year')
 
   for (const labelKey in labels) {
+    const points: { x: number[]; y: number[] } = { x: [], y: [] }
     const { label, image, color } = labels[labelKey]
-    const previousPoint = { x: 0, y: 0 }
-    const currentPoint = { x: 0, y: 0 }
-    const nextPoint = { x: 0, y: 0 }
+
+    dataUntilIndex.forEach((value, index) => {
+      const currentValue = value[labelKey]
+      points.x.push(index === 0 ? 0 : (sizes.chartWidth / (maxIndex - 1)) * index)
+      points.y.push((currentValue / maximumRange) * sizes.chartHeight)
+    })
+
+    const spline = new Spline(points.x, points.y)
+    const resolution = 300
+    const step = sizes.chartWidth / resolution
+
     context.beginPath()
     context.lineWidth = 4
     context.strokeStyle = color
-    dataUntilIndex.forEach((value, index) => {
-      const currentValue = value[labelKey]
-      const nextValue = values[index + 1][labelKey]
 
-      if (currentPoint.x === 0 && currentPoint.y === 0) {
-        currentPoint.x = index === 0 ? sizes.xStart : sizes.xStart + (sizes.chartWidth / (maxIndex - 1)) * index
-        currentPoint.y = sizes.yStart - (currentValue / maximumRange) * sizes.chartHeight
-      }
+    context.moveTo(sizes.xStart, sizes.yStart - spline.at(0))
 
-      nextPoint.x = index === 0 ? sizes.xStart : sizes.xStart + (sizes.chartWidth / (maxIndex - 1)) * index
-      nextPoint.y = sizes.yStart - (nextValue / maximumRange) * sizes.chartHeight
+    for (let index = 0; index < resolution; index++) {
+      context.lineTo(sizes.xStart + index * step, sizes.yStart - spline.at(index * step))
+    }
 
-      if (index > 0) {
-        // https://pomax.github.io/bezierjs/#fromPoints
-        // const dpoints = Bezier.quadraticFromPoints(previousPoint, currentPoint, nextPoint, 0.6).points[1]
-        // context.quadraticCurveTo(dpoints.x, dpoints.y, currentPoint.x, currentPoint.y)
-        context.lineTo(currentPoint.x, currentPoint.y)
-        // context.bezierCurveTo(xc, yc, xcp, ycp, positionX, positionY)
-      } else {
-        context.moveTo(currentPoint.x, currentPoint.y)
-      }
-
-      previousPoint.x = currentPoint.x
-      previousPoint.y = currentPoint.y
-
-      currentPoint.x = nextPoint.x
-      currentPoint.y = nextPoint.y
-    })
     context.stroke()
-    drawLabel(label, previousPoint.x, previousPoint.y, image)
+    drawLabel(label, sizes.xStart + 300 * step, sizes.yStart - spline.at(300 * step), image)
   }
 }
 
