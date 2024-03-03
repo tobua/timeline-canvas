@@ -14,52 +14,61 @@ export type Unit = number | string
 
 export type Values<Label extends number> = ({
   unit: Unit
-} & { [key in Label]: Value })[]
+} & { [Key in Label]: Value })[]
 
-export type Labels<Label extends number> = { [key in Label]: { label: string; image: string; color: string } }
+export type Labels<Label extends number> = { [Key in Label]: { label: string; image?: string; color: string } }
 
 const getRandomInteger = (minimum: number, maximum: number) => Math.floor(Math.random() * (maximum - minimum + 1)) + minimum
 
 export function jsxFrameworkDownloads() {
   enum Frameworks {
-    react = 0,
-    preact = 1,
-    solid = 2
+    React = 0,
+    Preact = 1,
+    Solid = 2,
   }
   const values = [] as Values<Frameworks>
 
   values.push({
     unit: 1989,
-    [Frameworks.react]: getRandomInteger(0, 6),
-    [Frameworks.preact]: getRandomInteger(0, 5),
-    [Frameworks.solid]: getRandomInteger(0, 4),
+    [Frameworks.React]: getRandomInteger(0, 6),
+    [Frameworks.Preact]: getRandomInteger(0, 5),
+    [Frameworks.Solid]: getRandomInteger(0, 4),
   })
 
   for (let year = 1990; year <= 2023; year++) {
     const previousValues = values[values.length - 1] // Ensure next values are close and will slightly go up.
     values.push({
       unit: year,
-      [Frameworks.react]: getRandomInteger(Math.max(0, previousValues[Frameworks.react] - 1), Math.min(100, previousValues[Frameworks.react] + 6)),
-      [Frameworks.preact]: getRandomInteger(Math.max(0, previousValues[Frameworks.preact] - 2), Math.min(100, previousValues[Frameworks.preact] + 5)),
-      [Frameworks.solid]: getRandomInteger(Math.max(0, previousValues[Frameworks.solid] - 3), Math.min(100, previousValues[Frameworks.solid] + 4)),
+      [Frameworks.React]: getRandomInteger(
+        Math.max(0, previousValues[Frameworks.React] - 1),
+        Math.min(100, previousValues[Frameworks.React] + 6),
+      ),
+      [Frameworks.Preact]: getRandomInteger(
+        Math.max(0, previousValues[Frameworks.Preact] - 2),
+        Math.min(100, previousValues[Frameworks.Preact] + 5),
+      ),
+      [Frameworks.Solid]: getRandomInteger(
+        Math.max(0, previousValues[Frameworks.Solid] - 3),
+        Math.min(100, previousValues[Frameworks.Solid] + 4),
+      ),
     })
   }
 
   const labels: Labels<Frameworks> = {
-    [Frameworks.react]: {
+    [Frameworks.React]: {
       label: 'React',
       image: react,
-      color: 'red',
+      color: '#61dbfb',
     },
-    [Frameworks.preact]: {
+    [Frameworks.Preact]: {
       label: 'Preact',
       image: preact,
-      color: 'blue',
+      color: '#6538b3',
     },
-    [Frameworks.solid]: {
+    [Frameworks.Solid]: {
       label: 'Solid',
       image: solid,
-      color: 'green',
+      color: 'rgb(68, 107, 158)',
     },
   }
 
@@ -68,83 +77,104 @@ export function jsxFrameworkDownloads() {
 
 export function largeCapCompanies() {
   enum Companies {
-    microsoft = 0,
-    apple = 1,
-    nvidia = 2,
-    saudiAramco = 3,
-    amazon = 4,
-    alphabet = 5,
-    meta = 6,
+    Microsoft = 0,
+    Apple = 1,
+    Nvidia = 2,
+    SaudiAramco = 3,
+    Amazon = 4,
+    Alphabet = 5,
+    Meta = 6,
   }
   const values = [] as Values<Companies>
 
   values.push({
     unit: 1989,
-    [Companies.microsoft]: getRandomInteger(0, 7),
-    [Companies.apple]: getRandomInteger(0, 6),
-    [Companies.nvidia]: getRandomInteger(0, 5),
-    [Companies.saudiAramco]: getRandomInteger(0, 4),
-    [Companies.amazon]: getRandomInteger(0, 3),
-    [Companies.alphabet]: getRandomInteger(0, 2),
-    [Companies.meta]: getRandomInteger(0, 1),
+    [Companies.Microsoft]: getRandomInteger(0, 7),
+    [Companies.Apple]: getRandomInteger(0, 6),
+    [Companies.Nvidia]: getRandomInteger(0, 5),
+    [Companies.SaudiAramco]: getRandomInteger(0, 4),
+    [Companies.Amazon]: getRandomInteger(0, 3),
+    [Companies.Alphabet]: getRandomInteger(0, 2),
+    [Companies.Meta]: getRandomInteger(0, 1),
   })
 
   for (let year = 1990; year <= 2023; year++) {
     const previousValues = values[values.length - 1] // Ensure next values are close and will slightly go up.
     values.push({
       unit: year,
-      [Companies.microsoft]: getRandomInteger(Math.max(0, previousValues[Companies.microsoft] - 1), Math.min(100, previousValues[Companies.microsoft] + 6)),
-      [Companies.apple]: getRandomInteger(Math.max(0, previousValues[Companies.apple] - 1), Math.min(100, previousValues[Companies.apple] + 6)),
-      [Companies.nvidia]: getRandomInteger(Math.max(0, previousValues[Companies.nvidia] - 1), Math.min(100, previousValues[Companies.nvidia] + 6)),
-      [Companies.saudiAramco]: getRandomInteger(Math.max(0, previousValues[Companies.saudiAramco] - 1), Math.min(100, previousValues[Companies.saudiAramco] + 6)),
-      [Companies.amazon]: getRandomInteger(Math.max(0, previousValues[Companies.amazon] - 1), Math.min(100, previousValues[Companies.amazon] + 6)),
-      [Companies.alphabet]: getRandomInteger(Math.max(0, previousValues[Companies.alphabet] - 1), Math.min(100, previousValues[Companies.alphabet] + 6)),
-      [Companies.meta]: getRandomInteger(Math.max(0, previousValues[Companies.meta] - 1), Math.min(100, previousValues[Companies.meta] + 6)),
+      [Companies.Microsoft]: getRandomInteger(
+        Math.max(0, previousValues[Companies.Microsoft] - 1),
+        Math.min(100, previousValues[Companies.Microsoft] + 6),
+      ),
+      [Companies.Apple]: getRandomInteger(
+        Math.max(0, previousValues[Companies.Apple] - 1),
+        Math.min(100, previousValues[Companies.Apple] + 6),
+      ),
+      [Companies.Nvidia]: getRandomInteger(
+        Math.max(0, previousValues[Companies.Nvidia] - 1),
+        Math.min(100, previousValues[Companies.Nvidia] + 6),
+      ),
+      [Companies.SaudiAramco]: getRandomInteger(
+        Math.max(0, previousValues[Companies.SaudiAramco] - 1),
+        Math.min(100, previousValues[Companies.SaudiAramco] + 6),
+      ),
+      [Companies.Amazon]: getRandomInteger(
+        Math.max(0, previousValues[Companies.Amazon] - 1),
+        Math.min(100, previousValues[Companies.Amazon] + 6),
+      ),
+      [Companies.Alphabet]: getRandomInteger(
+        Math.max(0, previousValues[Companies.Alphabet] - 1),
+        Math.min(100, previousValues[Companies.Alphabet] + 6),
+      ),
+      [Companies.Meta]: getRandomInteger(
+        Math.max(0, previousValues[Companies.Meta] - 1),
+        Math.min(100, previousValues[Companies.Meta] + 6),
+      ),
     })
   }
 
   const labels = {
-    [Companies.microsoft]: {
+    [Companies.Microsoft]: {
       label: 'Microsoft',
       legalName: 'Microsoft Corporation',
       image: microsoft,
-      color: 'red'
+      color: 'red',
     },
-    [Companies.apple]: {
+    [Companies.Apple]: {
       label: 'Apple',
       legalName: 'Apple Inc.',
       image: apple,
-      color: 'blue'
+      color: 'blue',
     },
-    [Companies.nvidia]: {
+    [Companies.Nvidia]: {
       label: 'Nvidia',
       legalName: 'Nvidia Corporation',
       image: nvidia,
-      color: 'green'
+      color: 'green',
     },
-    [Companies.saudiAramco]: {
+    [Companies.SaudiAramco]: {
       label: 'Saudi Aramco',
       legalName: 'Saudi Arabian Oil Group',
       image: saudiAramco,
-      color: 'yellow'
+      color: 'yellow',
     },
-    [Companies.amazon]: {
+    [Companies.Amazon]: {
       label: 'Amazon',
       legalName: 'Amazon.com, Inc.',
       image: amazon,
-      color: 'purple'
+      color: 'purple',
     },
-    [Companies.alphabet]: {
+    [Companies.Alphabet]: {
       label: 'Google',
       legalName: 'Alphabet Inc.',
       image: alphabet,
-      color: 'orange'
+      color: 'orange',
     },
-    [Companies.meta]: {
+    [Companies.Meta]: {
       label: 'Meta',
       legalName: 'Meta Platforms, Inc.',
       image: meta,
-      color: 'pink'
+      color: 'pink',
     },
   }
 

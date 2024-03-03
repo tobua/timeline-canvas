@@ -67,7 +67,9 @@ const App = () => {
 
   useEffect(() => {
     const canvas = canvasRef.current
-    if (!canvas) return
+    if (!canvas) {
+      return
+    }
     intializeCanvas(canvas)
     setBusy(false)
   }, [])
@@ -83,7 +85,7 @@ const App = () => {
         <Select
           placeholder="Data Source"
           options={[
-            { label: 'Frontend Frameworks', value: 'jsx' },
+            { label: 'JSX Frontend Frameworks', value: 'jsx' },
             { label: 'Companies by Market Capitalization', value: 'market-capitalization' },
           ]}
           onOption={(option) => setData(option === 'jsx' ? jsxFrameworkDownloads() : largeCapCompanies())}

@@ -4,6 +4,7 @@ import type { Values } from '../data'
 import { schedule } from '../scheduler'
 import { Button } from './Button'
 import { Input } from './Input'
+import { Performance } from './Performance'
 import { Select } from './Select'
 
 export interface Configuration {
@@ -14,6 +15,12 @@ export interface Configuration {
 }
 
 const wrapperStyles: CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: scale(40),
+}
+
+const rowStyles: CSSProperties = {
   display: 'flex',
   alignItems: 'flex-end',
   gap: scale(20),
@@ -26,26 +33,32 @@ export function Configuration({ busy, values }: { busy: boolean; values: Values<
   const [duration, setDuration] = useState(5)
   const [fps, setFps] = useState(60)
   const [start, setStart] = useState(10)
-  const [end, setEnd] = useState(values.length)
+  const [end, setEnd] = useState(values.length - 1)
 
   return (
     <div style={wrapperStyles}>
-      <Input placeholder="Duration" unit="Seconds" value={duration} onValue={setDuration} />
-      <Input placeholder="Frames per second" unit="FPS" value={fps} onValue={setFps} />
-      <Select
-        value={start}
-        placeholder="Start Position"
-        options={values.map((value, index) => ({ label: String(value.unit), value: String(index) }))}
-        onOption={(index) => setStart(Number(index))}
-      />
-      <Select
-        value={end - start}
-        placeholder="End Position"
-        options={values.slice(start + 1).map((value, index) => ({ label: String(value.unit), value: String(index + start) }))}
-        onOption={(index) => setEnd(Number(index))}
-      />
-      <Button onClick={() => schedule({ duration, fps, start, end })}>{busy ? 'Rendering' : 'Start'}</Button>
-      <Button>Record Video</Button>
+      <div style={rowStyles}>
+        <Input placeholder="Duration" unit="Seconds" value={duration} onValue={setDuration} />
+        <Input placeholder="Frames per second" unit="FPS" value={fps} onValue={setFps} />
+        <Select
+          // Need at least 5 data points to start rendering.
+          value={start - 5}
+          placeholder="Start Position"
+          options={values.slice(start).map((value, index) => ({ label: String(value.unit), value: String(index) }))}
+          onOption={(index) => setStart(Number(index + start + 5))}
+        />
+        <Select
+          value={end - start - 1}
+          placeholder="End Position"
+          options={values.slice(start + 1).map((value, index) => ({ label: String(value.unit), value: String(index) }))}
+          onOption={(index) => setEnd(Number(index) + start)}
+        />
+        <Button onClick={() => schedule({ duration, fps, start, end })}>{busy ? 'Rendering' : 'Start'}</Button>
+      </div>
+      <div style={rowStyles}>
+        <Performance />
+        <Button>Record Video</Button>
+      </div>
     </div>
   )
 }

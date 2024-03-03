@@ -74,15 +74,16 @@ function drawUnit(value: string | number, unit?: string) {
   }
 }
 
-function drawLabel(text: string, image: string, x: number, y: number) {
+function drawLabel(text: string, x: number, y: number, image?: string) {
   context.beginPath()
 
   const padding = Space.small
-  const imageSize = Space.medium
+  const imageSize = image ? Space.medium : 0
+  const imageSizeWithPadding = image ? imageSize + padding : 0
   context.font = '24px Arial'
   const textWidth = context.measureText(text).width
-  const boxWidth = textWidth + 2 * padding + imageSize + padding
-  const boxHeight = imageSize + 2 * padding
+  const boxWidth = textWidth + 2 * padding + imageSizeWithPadding
+  const boxHeight = Space.medium + 2 * padding
 
   context.fillStyle = Color.gray[300]
   context.roundRect(x + padding, y - boxHeight / 2, boxWidth, boxHeight, Space.small)
@@ -91,12 +92,16 @@ function drawLabel(text: string, image: string, x: number, y: number) {
   context.fillStyle = Color.black
 
   context.textAlign = 'left'
-  context.fillText(text, x + 3 * padding + imageSize, y + padding - 2)
+  const textPositionX = image ? 2 * padding + imageSizeWithPadding : 2 * padding
+  context.fillText(text, x + textPositionX, y + padding - 2)
 
-  drawImage(image, x + 2 * padding, y - padding, imageSize, imageSize)
+  if (image) {
+    drawImage(image, x + 2 * padding, y - padding, imageSize, imageSize)
+  }
 }
 
-export function renderLinesUntilIndex(maxIndex: number) {
+export function renderLinesUntilIndex(maxIndex: number, currentFrame: number) {
+  console.log({ currentFrame, maxIndex })
   const dataUntilIndex = values.slice(0, maxIndex)
   const maximumRange = findMaximumRange(dataUntilIndex)
 
@@ -140,7 +145,7 @@ export function renderLinesUntilIndex(maxIndex: number) {
       currentPoint.y = nextPoint.y
     })
     context.stroke()
-    drawLabel(label, image, previousPoint.x, previousPoint.y)
+    drawLabel(label, previousPoint.x, previousPoint.y, image)
   }
 }
 
@@ -188,7 +193,7 @@ export function renderStaticCanvasParts() {
   drawPoint(sizes.xStart, sizes.yStart, Color.black)
 }
 
-export function addChartData(data: { values: Values<number>; labels: Labels<number> })  {
+export function addChartData(data: { values: Values<number>; labels: Labels<number> }) {
   values = data.values
   labels = data.labels
 }
