@@ -5,6 +5,7 @@ import { Color, Space } from './style'
 let context: CanvasRenderingContext2D
 let values: Values<number> = []
 let labels: Labels<number> = {}
+let label = 'Year'
 
 const sizes = {
   padding: 50,
@@ -31,13 +32,6 @@ function findMaximumRange(partialValues: Values<number>) {
   }
 
   return max
-}
-
-function drawPoint(x: number, y: number, color = Color.black) {
-  context.beginPath()
-  context.arc(x, y, 5, 0, Math.PI * 2)
-  context.fillStyle = color
-  context.fill()
 }
 
 function drawImage(url: string, x: number, y: number, width: number, height: number) {
@@ -98,22 +92,32 @@ function drawLabel(text: string, x: number, y: number, image?: string) {
   }
 }
 
-export function renderLinesUntilIndex(maxIndex: number, currentFrame: number) {
+export function renderLinesUntilIndex(maxIndex: number, offset: number) {
   const dataUntilIndex = values.slice(0, maxIndex)
   const maximumRange = findMaximumRange(dataUntilIndex)
 
-  // TODO unit configurable.
-  drawUnit(values[maxIndex - 1].unit, 'Year')
+  drawUnit(values[maxIndex + 1].unit, label)
 
   for (const labelKey in labels) {
     const points: { x: number[]; y: number[] } = { x: [], y: [] }
     const { label, image, color } = labels[labelKey]
 
     dataUntilIndex.forEach((value, index) => {
+      if (offset > 0 && index === maxIndex - 1) {
+        return
+      }
       const currentValue = value[labelKey]
-      points.x.push(index === 0 ? 0 : (sizes.chartWidth / (maxIndex - 1)) * index)
+      points.x.push(index === 0 ? 0 : (sizes.chartWidth / (maxIndex - 1)) * (index - offset * (index / maxIndex)))
       points.y.push((currentValue / maximumRange) * sizes.chartHeight)
     })
+
+    // Add an interpolated point at the end according to the offset.
+    if (offset > 0) {
+      const offsetSpline = new Spline([0, 1], [dataUntilIndex[maxIndex - 2][labelKey], dataUntilIndex[maxIndex - 1][labelKey]])
+      const valueAtOffset = offsetSpline.at(offset)
+      points.x.push(sizes.chartWidth)
+      points.y.push((valueAtOffset / maximumRange) * sizes.chartHeight)
+    }
 
     const spline = new Spline(points.x, points.y)
     const resolution = 300
@@ -173,19 +177,19 @@ export function renderStaticCanvasParts() {
 
   drawAxes()
   labelAxes()
-
-  // TODO remove, used for debugging.
-  drawPoint(sizes.xStart, sizes.yStart, Color.black)
 }
 
-export function addChartData(data: { values: Values<number>; labels: Labels<number> }) {
+export function addChartData(data: { values: Values<number>; labels: Labels<number>; label: string }) {
   values = data.values
   labels = data.labels
+  label = data.label || 'Year'
 }
 
 export function intializeCanvas(canvas: HTMLCanvasElement) {
   const currentContext = canvas.getContext('2d')
-  if (!currentContext) return
+  if (!currentContext) {
+    return
+  }
   context = currentContext
 
   // Match canvas actual size to responsive size rendered in browser.

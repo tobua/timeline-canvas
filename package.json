@@ -1,5 +1,5 @@
 {
-  "name": "timeline-chart",
+  "name": "timeline-canvas",
   "scripts": {
     "build": "rsbuild build",
     "format": "biome format . --write",
@@ -15,6 +15,7 @@
     "@types/react": "^18.2.61",
     "@types/react-dom": "^18.2.19",
     "avait": "^1.0.0",
+    "download-stats": "^0.3.4",
     "optica": "^2.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

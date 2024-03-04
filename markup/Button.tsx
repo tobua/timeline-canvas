@@ -2,11 +2,11 @@ import { scale } from 'optica'
 import type { CSSProperties, JSX } from 'react'
 import { Color } from '../style'
 
-const buttonStyles: CSSProperties = {
+const buttonStyles = (color?: string): CSSProperties => ({
   display: 'flex',
   alignItems: 'center',
   border: 'none',
-  background: Color.black,
+  background: color ? color : Color.black,
   color: Color.white,
   outline: 'none',
   borderRadius: scale(10),
@@ -15,8 +15,8 @@ const buttonStyles: CSSProperties = {
   paddingRight: scale(20),
   cursor: 'pointer',
   whiteSpace: 'nowrap',
-}
+})
 
-export function Button({ style, ...props }: JSX.IntrinsicElements['button']) {
-  return <button type="submit" {...props} style={{ ...buttonStyles, ...style }} />
+export function Button({ style, color, ...props }: JSX.IntrinsicElements['button']) {
+  return <button type="submit" {...props} style={{ ...buttonStyles(color), ...style }} />
 }

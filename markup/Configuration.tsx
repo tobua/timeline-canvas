@@ -1,7 +1,8 @@
 import { scale } from 'optica'
-import { type CSSProperties, useState } from 'react'
+import { type CSSProperties, useEffect, useState } from 'react'
 import type { Values } from '../data'
 import { schedule } from '../scheduler'
+import { Color } from '../style'
 import { Button } from './Button'
 import { Input } from './Input'
 import { Performance } from './Performance'
@@ -27,13 +28,16 @@ const rowStyles: CSSProperties = {
   flexWrap: 'wrap',
 }
 
-// https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/captureStream
-
 export function Configuration({ busy, values }: { busy: boolean; values: Values<number> }) {
   const [duration, setDuration] = useState(5)
   const [fps, setFps] = useState(60)
   const [start, setStart] = useState(10)
   const [end, setEnd] = useState(values.length - 1)
+  const [recording, setRecording] = useState(false)
+
+  useEffect(() => {
+    setEnd(values.length - 1)
+  }, [values])
 
   return (
     <div style={wrapperStyles}>
@@ -45,7 +49,7 @@ export function Configuration({ busy, values }: { busy: boolean; values: Values<
           value={start - 5}
           placeholder="Start Position"
           options={values.slice(start).map((value, index) => ({ label: String(value.unit), value: String(index) }))}
-          onOption={(index) => setStart(Number(index + start + 5))}
+          onOption={(index) => setStart(Number(index) + start + 5)}
         />
         <Select
           value={end - start - 1}
@@ -53,11 +57,46 @@ export function Configuration({ busy, values }: { busy: boolean; values: Values<
           options={values.slice(start + 1).map((value, index) => ({ label: String(value.unit), value: String(index) }))}
           onOption={(index) => setEnd(Number(index) + start)}
         />
-        <Button onClick={() => schedule({ duration, fps, start, end })}>{busy ? 'Rendering' : 'Start'}</Button>
+        <Button color={Color.highlight} onClick={() => schedule({ duration, fps, start, end })}>
+          {busy ? 'Rendering' : 'Start'}
+        </Button>
       </div>
       <div style={rowStyles}>
         <Performance />
-        <Button>Record Video</Button>
+        <Button
+          onClick={() => {
+            setRecording(true)
+            const canvas = document.querySelector('canvas') as HTMLCanvasElement
+            const stream = canvas.captureStream(30)
+            const mediaRecorder = new MediaRecorder(stream)
+            const chunks: BlobPart[] = []
+            mediaRecorder.ondataavailable = (event) => chunks.push(event.data)
+            mediaRecorder.onstop = () => {
+              // Convert the recorded data chunks to a Blob and download the file.
+              const blob = new Blob(chunks, { type: 'video/mp4' })
+              const url = URL.createObjectURL(blob)
+              const anchor = document.createElement('a')
+              document.body.appendChild(anchor)
+              anchor.style.display = 'none'
+              anchor.href = url
+              anchor.download = 'timeline-video.mp4'
+              anchor.click()
+              window.URL.revokeObjectURL(url)
+              anchor.remove()
+            }
+            // Start recording.
+            mediaRecorder.start(100)
+            // Start rendering.
+            schedule({ duration, fps, start, end }, false, () => {
+              // Stop recording when done rendering.
+              mediaRecorder.stop()
+              setRecording(false)
+            })
+          }}
+          color={recording ? Color.error : Color.black}
+        >
+          {recording ? 'Recording...' : 'Record Video'}
+        </Button>
       </div>
     </div>
   )

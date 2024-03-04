@@ -1,6 +1,7 @@
 import { scale } from 'optica'
 import type { CSSProperties, JSX } from 'react'
 import { Color } from '../style'
+import { Open } from './Icon'
 
 const inputWrapperStyles: CSSProperties = {
   position: 'relative',
@@ -29,8 +30,17 @@ const selectStyles: CSSProperties = {
   borderRadius: scale(10),
   height: scale(40),
   paddingLeft: scale(10),
+  paddingRight: scale(35),
   cursor: 'pointer',
   minWidth: scale(140),
+  appearance: 'none',
+}
+
+const openStyles: CSSProperties = {
+  position: 'absolute',
+  right: scale(10),
+  height: scale(40),
+  pointerEvents: 'none',
 }
 
 export function Select({
@@ -54,6 +64,7 @@ export function Select({
           </option>
         ))}
       </select>
+      <Open style={openStyles} color={Color.white} width={16} height={16} />
     </div>
   )
 }

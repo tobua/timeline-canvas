@@ -9,7 +9,9 @@
 			"all": true,
 			"nursery": {
 				"all": true,
-				"useImportRestrictions": "off"
+				"useImportRestrictions": "off",
+				"noNodejsModules": "off",
+				"useFilenamingConvention": "off"
 			},
 			"style": {
 				"all": true,

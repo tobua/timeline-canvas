@@ -4,28 +4,31 @@ import { PerformanceState, setPerformance } from './markup/Performance'
 
 let effectiveTime = 0
 
-function renderUntilIndex(index: number, currentFrame: number) {
+function renderUntilIndex(index: number, offset: number) {
   clearCanvas()
   renderStaticCanvasParts()
-  renderLinesUntilIndex(index, currentFrame)
+  renderLinesUntilIndex(index, offset)
 }
 
-function renderWithDelay(index: number, end: number, totalTimeAvailable: number, currentFrame: number) {
+function renderWithDelay(index: number, end: number, totalTimePerFrame: number, offsetStep: number, offset: number, callback?: () => void) {
   if (index >= end) {
-    console.log(performance.now() - effectiveTime)
+    // console.log('total elapsed time', performance.now() - effectiveTime)
     effectiveTime = 0
     setPerformance(PerformanceState.Inactive)
+    if (callback) {
+      callback()
+    }
     return
   }
 
   const currentTime = performance.now()
-  renderUntilIndex(index, currentFrame)
+  renderUntilIndex(index, offset)
   const elapsedTime = performance.now() - currentTime
 
   // We wait for the next frame until the time for the current frame has passed.
-  const remainingTime = totalTimeAvailable - elapsedTime
+  const remainingTime = totalTimePerFrame - elapsedTime
 
-  const renderingTimePercentage = (elapsedTime / totalTimeAvailable) * 100
+  const renderingTimePercentage = (elapsedTime / totalTimePerFrame) * 100
 
   if (renderingTimePercentage < 25) {
     setPerformance(PerformanceState.Perfect)
@@ -37,16 +40,31 @@ function renderWithDelay(index: number, end: number, totalTimeAvailable: number,
     setPerformance(PerformanceState.Bad)
   }
 
-  setTimeout(() => renderWithDelay(index + 1, end, totalTimeAvailable, currentFrame + 1), remainingTime)
+  const next = offset + offsetStep >= 1
+  const nextOffset = next ? 0 : offset + offsetStep
+  const nextIndex = next ? index + 1 : index
+
+  // TODO requestAnimationFrame to possibly prevent flickering
+  setTimeout(() => renderWithDelay(nextIndex, end, totalTimePerFrame, offsetStep, nextOffset, callback), remainingTime)
 }
 
-export function schedule(configuration: Configuration) {
+export function schedule(configuration: Configuration, intial = false, callback?: () => void) {
   if (effectiveTime !== 0) {
     return
   }
   effectiveTime = performance.now()
-  const totalTimeAvailable = (configuration.duration * 1000) / configuration.fps
   renderUntilIndex(configuration.start, 0)
-  // Recursively rerender with delay until all values have been rendered.
-  renderWithDelay(configuration.start + 1, configuration.end, totalTimeAvailable, 1)
+
+  if (intial) {
+    effectiveTime = 0
+  } else {
+    const totalFrames = configuration.duration * configuration.fps
+    const totalTimePerFrame = (configuration.duration * 1000) / configuration.fps
+    const steps = configuration.end - configuration.start
+    const framesPerStep = totalFrames / steps
+    const offsetStep = 1 / framesPerStep
+
+    // Recursively rerender with delay until all values have been rendered.
+    renderWithDelay(configuration.start, configuration.end, totalTimePerFrame, offsetStep, offsetStep, callback)
+  }
 }

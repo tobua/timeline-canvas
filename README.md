@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/tobua/timeline-chart/raw/main/screenshot.png" alt="timeline-chart" width="300">
+  <img src="https://github.com/tobua/timeline-canvas/raw/main/screenshot.png" alt="timeline-canvas" width="300">
 </p>
 
 # Timeline Chart - Challenge for Algorithm Arena
@@ -8,17 +8,13 @@ Dynamically generated timeline chart in the browser. Submission for the seventh 
 
 ## Description
 
-The chart is rendered anew with each frame in an HTML `canvas` element. This way the chart is rendered smoothly and appears very dynamic. Rendered in the browser the chart is also fully responsive.
+The chart is dynamically rendered afresh with each frame in an HTML `canvas` element, ensuring a smooth and dynamic appearance. When viewed in the browser, the chart is fully responsive. Users can choose from various data sources, some real and others filled with random values at runtime. Underneath the chart, a set of options allows users to configure various parameters to tailor the chart rendering to their specific needs. Additionally, a performance indicator is provided to show whether each frame can be rendered within the allotted time. To enhance the smoothness of the chart lines, they are rendered as cubic splines. The canvas animation can be recorded and downloaded as an mp4 video, with optimal results in Safari and some compatibility issues in Chrome.
 
-It's possible to pick several data sources, some of them real and others filled with random values at runtime.
-
-Using the options below the chart it's possible to configure various parameters used to render the chart according to user needs.
-
-I don't think I've ever been able to use AI coding assistance more effectively than while implementing this challenge in [Cursor AI](https://cursor.sh). Since my canvas knowledge was super limited prior to implementing this and the default LLM knows a lot about this interface and how it's used, it was surprisingly helpful.
+I found the implementation of this challenge in [Cursor AI](https://cursor.sh) particularly effective, leveraging AI coding assistance to a greater extent than ever before. Prior to this project, my knowledge of canvas was limited, but with the support of the default language model, which possesses extensive knowledge of the canvas interface and its usage, the process became surprisingly helpful.
 
 ## Demo
 
-See this [𝕏 Post](https://twitter.com/matthiasgiger/status/1759485186666807649) or try the [live version](https://timeline-chart.vercel.app).
+See this [𝕏 Post](https://twitter.com/matthiasgiger/status/1764555624019349885) or try the [live version](https://timeline-canvas.vercel.app).
 
 ## Installation
 

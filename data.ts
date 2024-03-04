@@ -72,7 +72,7 @@ export function jsxFrameworkDownloads() {
     },
   }
 
-  return { values, labels }
+  return { values, labels, label: 'Year' }
 }
 
 export function largeCapCompanies() {
@@ -178,5 +178,13 @@ export function largeCapCompanies() {
     },
   }
 
-  return { values, labels }
+  return { values, labels, label: 'Year' }
+}
+
+export async function jsxFrameworkDownloadsReal() {
+  const {
+    default: { data: values, labels },
+  } = await import('./data/jsx-frameworks.json')
+
+  return { values, labels, label: 'Day' }
 }
